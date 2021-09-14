@@ -116,15 +116,29 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid *)0); //要修改索引值为0 的顶点属性，修改 3 个，浮点，连续顶点偏移量为 3 个浮点数，组件偏移量为0
 	glEnableVertexAttribArray(0);													   //允许着色器读取 GPU（服务端）的数据
 
+	//解除绑定，防止误操作
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	//绘制循环
 	while (!glfwWindowShouldClose(window))
 	{
-		glViewport(0, 0, screenWidth, screenWidth); //左下角开始位置，右上角结束位置，把这部分显存划分到自己这里
+		glViewport(0, 0, screenWidth, screenHeight); //左下角开始位置，右上角结束位置，把这部分显存划分到自己这里
 		glfwPollEvents();
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT); //渲染
-		glfwSwapBuffers(window);	  //交换缓冲区，在 window 上更新内容
+
+		glUseProgram(shaderProgram);	  //使用先前定义的着色器
+		glBindVertexArray(VAO);			  //绑定完，可以画图了
+		glDrawArrays(GL_TRIANGLES, 0, 3); //画三个点，从第0，到第2。画个三角形
+		glBindVertexArray(0);			  //解除绑定
+
+		glfwSwapBuffers(window); //交换缓冲区，在 window 上更新内容
 	}
 	glfwTerminate();
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteProgram(shaderProgram);
 	return 0;
 
 	/* glfwInit();
