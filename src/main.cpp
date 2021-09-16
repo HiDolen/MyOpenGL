@@ -5,9 +5,11 @@
 //GLFW
 #include <GLFW/glfw3.h>
 
+#include "Shader.h"
+
 const GLint WIDTH = 800, HEIGHT = 600;
 
-const GLchar *vertexShaderCode = "#version 330 core\n"
+/* const GLchar *vertexShaderCode = "#version 330 core\n"
 								 "layout(location=0) in vec3 position;\n"
 								 "void main()\n"
 								 "{\n"
@@ -18,10 +20,7 @@ const GLchar *fragmentShaderCode = "#version 330 core\n"
 								   "void main()\n"
 								   "{\n"
 								   "color=vec4(1.0f,0.5f,0.2f,1.0f);\n"
-								   "}"; //片段着色器
-
-GLint success;		 //存储编译是否正确
-GLchar infoLog[512]; //存储日志
+								   "}"; //片段着色器 */
 
 int main()
 {
@@ -57,7 +56,11 @@ int main()
 		return -1;
 	}
 
-	//开始导入着色器
+	/* //开始导入着色器
+
+	GLint success;		 //存储编译是否正确
+	GLchar infoLog[512]; //存储日志
+
 	//首先是顶点着色器
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexShaderCode, NULL); //传 1 个着色器，传入先前的代码，传入位置为 NULL（起始位置）
@@ -97,7 +100,9 @@ int main()
 				  << infoLog << std::endl;
 	}
 	glDeleteShader(vertexShader); //释放空间
-	glDeleteShader(fragmentShader);
+	glDeleteShader(fragmentShader); */
+
+	Shader myShader = Shader("src/res/shaders/core.vs", "src/res/shaders/core.fs"); //导入并实例化 shader
 
 	//顶点信息
 	//OpenGL 的原点在屏幕正中心
@@ -128,7 +133,8 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT); //渲染
 
-		glUseProgram(shaderProgram);	  //使用先前定义的着色器
+		// glUseProgram(shaderProgram);	  //使用先前定义的着色器
+		myShader.Use();
 		glBindVertexArray(VAO);			  //绑定完，可以画图了
 		glDrawArrays(GL_TRIANGLES, 0, 3); //画三个点，从第0，到第2。画个三角形
 		glBindVertexArray(0);			  //解除绑定
@@ -138,41 +144,6 @@ int main()
 	glfwTerminate();
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
-	glDeleteProgram(shaderProgram);
+	// glDeleteProgram(shaderProgram);
 	return 0;
-
-	/* glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // must for Mac
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Learn OpenGL", nullptr,
-										  nullptr);
-	// next two lines are for mac retina display
-	int screenWidth, screenHeight;
-	glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
-	if (nullptr == window)
-	{
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-	glewExperimental = GL_TRUE;
-	if (GLEW_OK != glewInit())
-	{
-		std::cout << "Failed to initialise GLEW" << std::endl;
-		return -1;
-	}
-	glViewport(0, 0, screenWidth, screenHeight);
-	while (!glfwWindowShouldClose(window))
-	{
-		glfwPollEvents();
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glfwSwapBuffers(window);
-	}
-	glfwTerminate();
-	return 0; */
 }
