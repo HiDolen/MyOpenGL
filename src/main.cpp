@@ -106,21 +106,31 @@ int main()
 
 	//顶点信息
 	//OpenGL 的原点在屏幕正中心
+	/* GLfloat vertices[] =
+		{//位置					颜色
+		 -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+		 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f}; */
 	GLfloat vertices[] =
-		{
-			-0.5f, -0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f,
-			0.0f, 0.5f, 0.0f};
+		{//左半边位置，右半边颜色
+		 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+		 -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+		 //第二个三角形
+		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+		 -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+		 -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f};
 
 	GLuint VAO, VBO; //顶点数组对象，顶点缓冲对象
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
-	glBindVertexArray(VAO);															   //绑定 VAO
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);												   //绑定 VBO，告诉 OpenGL 这是个顶点缓冲对象
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);		   //指定 ID 的缓冲类型为 GL_ARRAY_BUFFER，大小刚好为顶点大小，实际发出数据为顶点数组，OpenGL 处理策略为数据几乎不改变
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid *)0); //要修改索引值为0 的顶点属性，修改 3 个，浮点，连续顶点偏移量为 3 个浮点数，组件偏移量为0
-	glEnableVertexAttribArray(0);													   //允许着色器读取 GPU（服务端）的数据
-
+	glBindVertexArray(VAO);																				   //绑定 VAO
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);																	   //绑定 VBO，告诉 OpenGL 这是个顶点缓冲对象
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);							   //指定 ID 的缓冲类型为 GL_ARRAY_BUFFER，大小刚好为顶点大小，实际发出数据为顶点数组，OpenGL 处理策略为数据几乎不改变
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)0);					   //要修改索引值为0 的顶点属性，修改 3 个，浮点，连续顶点偏移量为 3 个浮点数，组件偏移量为0
+	glEnableVertexAttribArray(0);																		   //允许着色器读取 GPU（服务端）的数据
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat))); //读颜色
+	glEnableVertexAttribArray(1);
 	//解除绑定，防止误操作
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -136,7 +146,7 @@ int main()
 		// glUseProgram(shaderProgram);	  //使用先前定义的着色器
 		myShader.Use();
 		glBindVertexArray(VAO);			  //绑定完，可以画图了
-		glDrawArrays(GL_TRIANGLES, 0, 3); //画三个点，从第0，到第2。画个三角形
+		glDrawArrays(GL_TRIANGLES, 0, 6); //画六个点，从第0，到第2。画两个三角形
 		glBindVertexArray(0);			  //解除绑定
 
 		glfwSwapBuffers(window); //交换缓冲区，在 window 上更新内容
