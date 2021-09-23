@@ -138,6 +138,7 @@ int main()
 	//绘制循环
 	while (!glfwWindowShouldClose(window))
 	{
+		float time = glfwGetTime();
 		glViewport(0, 0, screenWidth, screenHeight); //左下角开始位置，右上角结束位置，把这部分显存划分到自己这里
 		glfwPollEvents();
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -145,6 +146,9 @@ int main()
 
 		// glUseProgram(shaderProgram);	  //使用先前定义的着色器
 		myShader.Use();
+
+		glUniform1f(glGetUniformLocation(myShader.Program, "time"), time);
+
 		glBindVertexArray(VAO);			  //绑定完，可以画图了
 		glDrawArrays(GL_TRIANGLES, 0, 6); //画六个点，从第0，到第2。画两个三角形
 		glBindVertexArray(0);			  //解除绑定
