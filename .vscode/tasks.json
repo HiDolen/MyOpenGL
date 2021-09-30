@@ -14,8 +14,9 @@
                 "args": [
                     // "-c",
                     // "mingw32-make",
-                    "-g",
+                    "-g", //debug 版本
                     "${file}",
+                    // "${workspaceFolder}/include/SOIL2/SOIL2.c",
                     "-o", //将开始输出
                     // "${fileDirname}\\${fileBasenameNoExtension}.exe",
                     "${workspaceFolder}/output/main", //输出文件
@@ -23,6 +24,7 @@
                     "./include",
                     "-L ${workspaceFolder}/lib", //静态链接库
                     "-Llib", //将开始 lib
+                    "-lSOIL2",//必须放在最前面，否则无法形成依赖关系
                     "-lglew32",
                     "-lglfw3dll",
                     "-lopengl32",

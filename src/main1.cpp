@@ -9,6 +9,8 @@
 
 #include "Shader.h"
 
+#include <SOIL2/SOIL2.h>
+
 const GLint WIDTH = 800, HEIGHT = 600;
 
 using namespace std;
@@ -97,6 +99,19 @@ int main1()
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //解除顶点缓冲对象 VBO 的绑定，防止误操作
 	glBindVertexArray(0);			  //解除绑定 VAO
 
+	GLuint texture; //纹理
+	int width, height;
+	glGenTextures(1, &texture);			   //创建纹理
+	glBindTexture(GL_TEXTURE_2D, texture); //绑定纹理，类型为二维纹理
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	unsigned char *image = SOIL_load_image("src/res/images/T_image1.jpg", &width, &height, 0, SOIL_LOAD_RGBA);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0); //解除纹理绑定
+
 	//绘制循环
 	while (!glfwWindowShouldClose(window))
 	{
@@ -106,17 +121,10 @@ int main1()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //指定背景颜色
 		glClear(GL_COLOR_BUFFER_BIT);		  //设置背景颜色
 
-		/* for (int m = 0; m < 6; m++)
-		{
-			vertices[m * 6 + 3] = cos(time * 5) * 0.5f + 0.5f;				//更改红色
-			vertices[m * 6 + 4] = (1 - cos(time * 5) * 0.5f - 0.5f) * 0.6f; //更改绿色
-		}
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);																	   //绑定 VBO
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);							   //将顶点数据复制到缓冲区
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat))); //读颜色
-		glBindBuffer(GL_ARRAY_BUFFER, 0);																	   //解除顶点缓冲对象 VBO 的绑定 */
-
-		myShader.Use(); //之后的着色渲染都会使用这个 shader 程序
+		myShader.Use();				  //之后的着色渲染都会使用这个 shader 程序
+		glActiveTexture(GL_TEXTURE0); //其实第 0 个纹理会被自动激活，不需要这行代码
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glUniform1i(glGetUniformLocation(ourShader.Program,"texture0"),0);
 
 		glUniform1f(glGetUniformLocation(myShader.Program, "time"), time);
 
@@ -134,5 +142,6 @@ int main1()
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
+	glDeleteTextures(1,&texture);
 	return 0;
 }
