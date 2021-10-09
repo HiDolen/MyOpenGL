@@ -44,7 +44,10 @@
     "stdexcept": "cpp",
     "streambuf": "cpp",
     "cinttypes": "cpp",
-    "typeinfo": "cpp"
+    "typeinfo": "cpp",
+    "cstring": "cpp",
+    "ctime": "cpp",
+    "iomanip": "cpp"
   },
   "C_Cpp_Runner.cCompilerPath": "E:\\MinGW\\bin\\gcc.exe",
   "C_Cpp_Runner.cppCompilerPath": "E:\\MinGW\\bin\\g++.exe",

@@ -24,10 +24,11 @@
                     "./include",
                     "-L ${workspaceFolder}/lib", //静态链接库
                     "-Llib", //将开始 lib
-                    "-lSOIL2",//必须放在最前面，否则无法形成依赖关系
+                    "-lSOIL2", //必须放在最前面，否则无法形成依赖关系
                     "-lglew32",
                     "-lglfw3dll",
                     "-lopengl32",
+                    // "-lglm",
                     /*
                     "${file}",
                     "-o", // 指定输出文件名，不加该参数则默认输出a.exe，Linux下默认a.out
