@@ -53,26 +53,57 @@ int main()
         return -1;
     }
 
+    glEnable(GL_DEPTH_TEST); //开启深度测试
+    glDepthFunc(GL_LESS);
+    glEnable(GL_BLEND); //开启混合测试
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     Shader myShader = Shader("src/res/shaders/core.vs", "src/res/shaders/core.fs"); //导入并实例化 shader
 
-    //另一种方案画正方形
-    GLfloat vertices[] =
-        {
-            //位置3个，颜色3个，纹理坐标2个
-            0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,   //右上角
-            0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  //右下角
-            -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, //左下角
-            -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f   //左上角
-        };
-    unsigned int indices[] = //连接指数
-        {
-            0,
-            1,
-            3,
-            1,
-            2,
-            3,
-        };
+    //为三维给出数组
+    GLfloat vertices[] = {
+        //位置3个，颜色3个
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        ////
+        -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        ////
+        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        ////
+        0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0.0f,
+        ////
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,
+        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 1.0f,
+        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,
+        ////
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 1.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 1.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 1.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 1.0f};
 
     GLuint VAO, VBO;                                                                                       //顶点数组对象，顶点缓冲对象。两个 ID
     glGenVertexArrays(1, &VAO);                                                                            //创建空间，创建 1 个空间
@@ -84,30 +115,9 @@ int main()
     glEnableVertexAttribArray(0);                                                                          //让 shader 能够读取数据
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat))); //读颜色
     glEnableVertexAttribArray(1);                                                                          //让 shader 能够读取数据
-    // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)(6 * sizeof(GLfloat))); //读纹理坐标
-    // glEnableVertexAttribArray(2);                                                                          //让 shader 能够读取数据
-
-    GLuint EBO;            //顶点信息
-    glGenBuffers(1, &EBO); //创建空间
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //解绑
 
     glBindBuffer(GL_ARRAY_BUFFER, 0); //解除顶点缓冲对象 VBO 的绑定，防止误操作
     glBindVertexArray(0);             //解除绑定 VAO
-
-    // GLuint texture; //纹理
-    int width, height;
-    // glGenTextures(1, &texture);            //创建纹理
-    // glBindTexture(GL_TEXTURE_2D, texture); //绑定纹理，类型为二维纹理
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    unsigned char *image = SOIL_load_image("src/res/images/T_image1.jpg", &width, &height, 0, SOIL_LOAD_RGBA);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, 0); //解除纹理绑定
 
     //绘制循环
     while (!glfwWindowShouldClose(window))
@@ -115,30 +125,30 @@ int main()
         float time = glfwGetTime();
         glViewport(0, 0, screenWidth, screenHeight); //左下角开始位置，右上角结束位置，把这部分显存划分到自己这里
         glfwPollEvents();
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //指定背景颜色
-        glClear(GL_COLOR_BUFFER_BIT);         //设置背景颜色
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);               //指定背景颜色
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //设置背景颜色
 
-        myShader.Use();               //之后的着色渲染都会使用这个 shader 程序
-        glActiveTexture(GL_TEXTURE0); //其实第 0 个纹理会被自动激活，不需要这行代码
-        // glBindTexture(GL_TEXTURE_2D, texture);
-        glUniform1i(glGetUniformLocation(myShader.Program, "texture0"), 0);
+        myShader.Use(); //之后的着色渲染都会使用这个 shader 程序
+
+        glm::mat4 transform = glm::mat4(1.0f); //初始化位置，使得可以旋转
+        transform = glm::rotate(transform, glm::radians(20.0f) * static_cast<GLfloat>(glfwGetTime()), glm::vec3(1.0f, 1.0f, 1.0f));
+        transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.5f));
+        transform = glm::translate(transform, glm::vec3(0.0f, 0.4f, 0.0f)); //平移
+
+        GLuint transLoc = glGetUniformLocation(myShader.Program, "transform");
+        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
         glUniform1f(glGetUniformLocation(myShader.Program, "time"), time);
 
         glBindVertexArray(VAO); //绑定完，可以画图了
-        // glDrawArrays(GL_TRIANGLES, 0, 6); //画六个点，从第0，到第2。画两个三角形
-        //上面这个绘图方式不适于带有连接信息的绘图
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);          //绑定 EBO
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //绘图
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);            //解除绑定 EBO
-        glBindVertexArray(0);                                //解除绑定 VAO
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //解除绑定 EBO
+        glBindVertexArray(0);                     //解除绑定 VAO
 
         glfwSwapBuffers(window); //交换缓冲区，在 window 上更新内容
     }
     glfwTerminate();
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    // glDeleteTextures(1, &texture);
     return 0;
 }
