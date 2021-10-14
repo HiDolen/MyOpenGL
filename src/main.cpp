@@ -137,14 +137,20 @@ int main()
         myShader.Use(); //之后的着色渲染都会使用这个 shader 程序
 
         glm::mat4 transform = glm::mat4(1.0f); //初始化位置，使得可以旋转
+        transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, -2.0f));
         transform = glm::rotate(transform, glm::radians(20.0f) * static_cast<GLfloat>(glfwGetTime()), glm::vec3(1.0f, 1.0f, 1.0f));
         transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.5f));
-        transform = glm::translate(transform, glm::vec3(0.0f, 0.4f, 0.0f)); //平移
 
         GLuint transLoc = glGetUniformLocation(myShader.Program, "transform");
         glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(transform));
+        glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+        glUniformMatrix4fv(glGetUniformLocation(myShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        // transform = glm::translate(transform, glm::vec3(0.0f, 0.4f, 0.0f)); //平移
 
-        glUniform1f(glGetUniformLocation(myShader.Program, "time"), time);
+        /* GLuint transLoc = glGetUniformLocation(myShader.Program, "transform");
+        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+        glUniform1f(glGetUniformLocation(myShader.Program, "time"), time); */
 
         glBindVertexArray(VAO); //绑定完，可以画图了
         glDrawArrays(GL_TRIANGLES, 0, 36);
