@@ -17,6 +17,9 @@
 
 const GLint WIDTH = 800, HEIGHT = 600;
 
+void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode); //准备对键盘输入作出响应，函数声明
+bool keys[1024];
+
 using namespace std;
 
 int main()
@@ -45,7 +48,10 @@ int main()
     glfwGetFramebufferSize(window, &screenWidth, &screenHeight); //获取窗口的大小
 
     glfwMakeContextCurrent(window); //设置当前窗口上下文
-    glewExperimental = GL_TRUE;     //历史遗留问题，必须把这个设为 true
+
+    glfwSetKeyCallback(window, KeyCallback); //键盘输入相关
+
+    glewExperimental = GL_TRUE; //历史遗留问题，必须把这个设为 true
     if (GLEW_OK != glewInit())
     {
         std::cout << "Failed to initialise GLEW" << std::endl;
@@ -151,4 +157,23 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     return 0;
+}
+
+void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(window, GL_TRUE);
+    }
+    if (key >= 0 && key < 1024)
+    {
+        if (action == GLFW_PRESS)
+        {
+            keys[key] = true;
+        }
+        else if (action == GLFW_RELEASE)
+        {
+            keys[key] = false;
+        }
+    }
 }
