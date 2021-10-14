@@ -92,17 +92,31 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0); //解除顶点缓冲对象 VBO 的绑定，防止误操作
     glBindVertexArray(0);             //解除绑定 VAO
 
-    GLuint texture; //纹理
+    GLuint texture1; //纹理
+    GLuint texture2; //纹理
     int width, height;
-    glGenTextures(1, &texture);            //创建纹理
-    glBindTexture(GL_TEXTURE_2D, texture); //绑定纹理，类型为二维纹理
+    glGenTextures(1, &texture1); //创建纹理
+    glGenTextures(1, &texture2); //创建纹理
+    // glBindTexture(GL_TEXTURE_2D, texture); //绑定纹理，类型为二维纹理
+    GLuint textureID[2];         //纹理编号，方便纹理之间的切换
+    glGenTextures(2, textureID); //分配 2 个纹理编号对象
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    unsigned char *image = SOIL_load_image("src/res/images/T_image1.jpg", &width, &height, 0, SOIL_LOAD_RGBA);
+
+    unsigned char *image;
+    // glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, textureID[0]); //加载第一幅纹理
+    image = SOIL_load_image("src/res/images/T_Reflection_Tiles_D.jpg", &width, &height, 0, SOIL_LOAD_RGBA);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, textureID[1]); //加载第二幅纹理
+    image = SOIL_load_image("src/res/images/T_TilingNoise03_M.jpg", &width, &height, 0, SOIL_LOAD_RGBA);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
     glBindTexture(GL_TEXTURE_2D, 0); //解除纹理绑定
 
     //绘制循环
@@ -116,7 +130,7 @@ int main()
 
         myShader.Use();               //之后的着色渲染都会使用这个 shader 程序
         glActiveTexture(GL_TEXTURE0); //其实第 0 个纹理会被自动激活，不需要这行代码
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindTexture(GL_TEXTURE_2D, textureID[1]);
         glUniform1i(glGetUniformLocation(myShader.Program, "texture0"), 0);
 
         glUniform1f(glGetUniformLocation(myShader.Program, "time"), time);
@@ -135,6 +149,7 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-    glDeleteTextures(1, &texture);
+    glDeleteTextures(1, &textureID[0]);
+    glDeleteTextures(1, &textureID[1]);
     return 0;
 }
