@@ -112,26 +112,43 @@ int main()
     glBindTexture(GL_TEXTURE_2D, textureID[0]); //加载第一幅纹理
     image = SOIL_load_image("src/res/images/T_Reflection_Tiles_D.jpg", &width, &height, 0, SOIL_LOAD_RGBA);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glUniform1i(glGetUniformLocation(myShader.Program, "texture0"), 0); //传值
 
     glBindTexture(GL_TEXTURE_2D, textureID[1]); //加载第二幅纹理
     image = SOIL_load_image("src/res/images/T_TilingNoise03_M.jpg", &width, &height, 0, SOIL_LOAD_RGBA);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glUniform1i(glGetUniformLocation(myShader.Program, "texture1"), 0); //传值
 
     glBindTexture(GL_TEXTURE_2D, 0); //解除纹理绑定
+
+    float previousTime = glfwGetTime();
 
     //绘制循环
     while (!glfwWindowShouldClose(window))
     {
         float time = glfwGetTime();
+
         glViewport(0, 0, screenWidth, screenHeight); //左下角开始位置，右上角结束位置，把这部分显存划分到自己这里
         glfwPollEvents();
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //指定背景颜色
         glClear(GL_COLOR_BUFFER_BIT);         //设置背景颜色
 
-        myShader.Use();               //之后的着色渲染都会使用这个 shader 程序
-        glActiveTexture(GL_TEXTURE0); //其实第 0 个纹理会被自动激活，不需要这行代码
-        glBindTexture(GL_TEXTURE_2D, textureID[1]);
+        myShader.Use(); //之后的着色渲染都会使用这个 shader 程序
+
+        /////////////////////////////////////
+
+        glActiveTexture(GL_TEXTURE0); //激活
+        glBindTexture(GL_TEXTURE_2D, textureID[0]);
         glUniform1i(glGetUniformLocation(myShader.Program, "texture0"), 0);
+        glActiveTexture(GL_TEXTURE1); //激活
+        glBindTexture(GL_TEXTURE_2D, textureID[1]);
+        glUniform1i(glGetUniformLocation(myShader.Program, "texture1"), 1);
+
+        ////////////////////////////////////
+
+        // glUniform1i(glGetUniformLocation(myShader.Program, "texture0"), 0);
 
         glUniform1f(glGetUniformLocation(myShader.Program, "time"), time);
 
