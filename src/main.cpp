@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Shader.h"
+#include "Camera.h"
 
 #include <SOIL2/SOIL2.h>
 
@@ -18,7 +19,17 @@
 const GLint WIDTH = 800, HEIGHT = 600;
 
 void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode); //准备对键盘输入作出响应，函数声明
+void MouseCallback(GLFWwindow *window, double xOffset, double yOffset);            //鼠标位置输入
+void ScrollCallback(GLFWwindow *window, double xPos, double yPos);                 //鼠标滚轮输入
+
+void DoMovement();
+
 bool keys[1024];
+Camera camera(glm::vec3(0.0f, 0.0f, 2.0f));
+GLfloat deltaTime = 0.0f;
+GLfloat lastTime = 0.0f;
+GLfloat lastX = WIDTH / 2.0f;
+GLfloat lastY = HEIGHT / 2.0f;
 
 using namespace std;
 
@@ -49,7 +60,9 @@ int main()
 
     glfwMakeContextCurrent(window); //设置当前窗口上下文
 
-    glfwSetKeyCallback(window, KeyCallback); //键盘输入相关
+    glfwSetKeyCallback(window, KeyCallback);         //键盘输入相关
+    glfwSetCursorPosCallback(window, MouseCallback); //鼠标位置输入
+    glfwSetScrollCallback(window, ScrollCallback);   //鼠标滚轮输入
 
     glewExperimental = GL_TRUE; //历史遗留问题，必须把这个设为 true
     if (GLEW_OK != glewInit())
@@ -128,9 +141,15 @@ int main()
     //绘制循环
     while (!glfwWindowShouldClose(window))
     {
-        float time = glfwGetTime();
-        glViewport(0, 0, screenWidth, screenHeight); //左下角开始位置，右上角结束位置，把这部分显存划分到自己这里
-        glfwPollEvents();
+        GLfloat currentTime = glfwGetTime();
+        deltaTime = currentTime - lastTime;
+        lastTime = currentTime;
+
+        // float time = glfwGetTime();
+
+        glViewport(0, 0, screenWidth, screenHeight);        //左下角开始位置，右上角结束位置，把这部分显存划分到自己这里
+        glfwPollEvents();                                   //监听键盘事件
+        DoMovement();                                       //摄像机视角变换
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);               //指定背景颜色
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //设置背景颜色
 
@@ -143,14 +162,11 @@ int main()
 
         GLuint transLoc = glGetUniformLocation(myShader.Program, "transform");
         glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(transform));
-        glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+
+        glm::mat4 view = camera.GetViewMatrix(); //从相机获取视角
+        glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
         glUniformMatrix4fv(glGetUniformLocation(myShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        // transform = glm::translate(transform, glm::vec3(0.0f, 0.4f, 0.0f)); //平移
-
-        /* GLuint transLoc = glGetUniformLocation(myShader.Program, "transform");
-        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(transform));
-
-        glUniform1f(glGetUniformLocation(myShader.Program, "time"), time); */
+        glUniformMatrix4fv(glGetUniformLocation(myShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 
         glBindVertexArray(VAO); //绑定完，可以画图了
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -182,4 +198,37 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
             keys[key] = false;
         }
     }
+}
+
+void DoMovement()
+{
+    if (keys[GLFW_KEY_W] || keys[GLFW_KEY_UP])
+    {
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    }
+    if (keys[GLFW_KEY_S] || keys[GLFW_KEY_DOWN])
+    {
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    }
+    if (keys[GLFW_KEY_A] || keys[GLFW_KEY_LEFT])
+    {
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    }
+    if (keys[GLFW_KEY_D] || keys[GLFW_KEY_RIGHT])
+    {
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+    }
+}
+
+void MouseCallback(GLFWwindow *window, double xOffset, double yOffset)
+{
+}
+
+void ScrollCallback(GLFWwindow *window, double xPos, double yPos)
+{
+    GLfloat xOffset = xPos - lastX;
+    GLfloat yOffset = lastY - yPos;
+
+    lastX = xPos;
+    lastY = yPos;
 }
