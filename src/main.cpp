@@ -31,6 +31,9 @@ GLfloat lastTime = 0.0f;
 GLfloat lastX = WIDTH / 2.0f;
 GLfloat lastY = HEIGHT / 2.0f;
 
+bool firstMouse = true; //避免一开始的鼠标跳变
+bool firstMouseScroll = true;
+
 using namespace std;
 
 int main()
@@ -220,15 +223,25 @@ void DoMovement()
     }
 }
 
-void MouseCallback(GLFWwindow *window, double xOffset, double yOffset)
+void ScrollCallback(GLFWwindow *window, double xOffset, double yOffset)
 {
+    camera.ProcessMouseScroll(yOffset);
 }
 
-void ScrollCallback(GLFWwindow *window, double xPos, double yPos)
+void MouseCallback(GLFWwindow *window, double xPos, double yPos)
 {
+    if (firstMouse) //第一次变换被忽略，阻止跳变
+    {
+        lastX = xPos;
+        lastY = yPos;
+        firstMouse = false;
+    }
+
     GLfloat xOffset = xPos - lastX;
     GLfloat yOffset = lastY - yPos;
 
     lastX = xPos;
     lastY = yPos;
+
+    camera.ProcessMouseMovement(xOffset, yOffset);
 }

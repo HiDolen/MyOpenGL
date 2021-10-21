@@ -72,6 +72,15 @@ public:
     {
         xOffset *= this->mouseSensitivity;
         yOffset *= this->mouseSensitivity;
+
+        this->yaw += xOffset;
+        this->pitch += yOffset;
+        this->updateCameraVectors();
+    }
+
+    void ProcessMouseScroll(GLfloat amount)
+    {
+        zoom -= amount;
     }
 
 private:
