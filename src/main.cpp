@@ -9,12 +9,14 @@
 
 #include "Shader.h"
 #include "Camera.h"
+#include "Light.h"
 
 #include <SOIL2/SOIL2.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 const GLint WIDTH = 800, HEIGHT = 600;
 
@@ -32,7 +34,6 @@ GLfloat lastX = WIDTH / 2.0f;
 GLfloat lastY = HEIGHT / 2.0f;
 
 bool firstMouse = true; //避免一开始的鼠标跳变
-bool firstMouseScroll = true;
 
 using namespace std;
 
@@ -80,52 +81,55 @@ int main()
     glEnable(GL_BLEND); //开启混合测试
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Shader myShader = Shader("src/res/shaders/core.vs", "src/res/shaders/core.fs"); //导入并实例化 shader
+    Shader ourShader = Shader("src/res/shaders/core.vs", "src/res/shaders/core.fs");      //导入并实例化 shader
+    Shader lightShader = Shader("src/res/shaders/light.vs", "src/res/shaders/light.fs"); //导入并实例化 shader
+
+    Light lightModel = Light();
 
     //为三维给出数组
     GLfloat vertices[] = {
-        //位置3个，颜色3个
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-        -0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        //位置3个，颜色3个，法向量
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+        0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+        0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+        -0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
         ////
-        -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
         ////
-        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-        -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
         ////
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 0.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
         ////
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
         ////
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
-        0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
-        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 1.0f,
-        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 1.0f,
-        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 1.0f,
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 1.0f};
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f};
 
     GLuint VAO, VBO;                                                                                       //顶点数组对象，顶点缓冲对象。两个 ID
     glGenVertexArrays(1, &VAO);                                                                            //创建空间，创建 1 个空间
@@ -133,13 +137,17 @@ int main()
     glBindVertexArray(VAO);                                                                                //绑定 VAO
     glBindBuffer(GL_ARRAY_BUFFER, VBO);                                                                    //绑定 VBO，告诉 OpenGL 这是个顶点缓冲对象（GL_ARRAY_BUFFER）
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);                             //将顶点数据复制到缓冲区，大小刚好为顶点大小，实际发出数据为顶点数组，OpenGL 处理策略为数据几乎不改变
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)0);                     //告诉 OpenGL 怎么处理顶点数据。要修改索引值为0 的顶点属性，修改 3 个，浮点，连续顶点偏移量为 3 个浮点数，组件偏移量为0
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid *)0);                     //告诉 OpenGL 怎么处理顶点数据。要修改索引值为0 的顶点属性，修改 3 个，浮点，连续顶点偏移量为 3 个浮点数，组件偏移量为0
     glEnableVertexAttribArray(0);                                                                          //让 shader 能够读取数据
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat))); //读颜色
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat))); //读颜色
     glEnableVertexAttribArray(1);                                                                          //让 shader 能够读取数据
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid *)(6 * sizeof(GLfloat))); //读法向量
+    glEnableVertexAttribArray(2);                                                                          //让 shader 能够读取数据
 
     glBindBuffer(GL_ARRAY_BUFFER, 0); //解除顶点缓冲对象 VBO 的绑定，防止误操作
     glBindVertexArray(0);             //解除绑定 VAO
+
+    glm::vec3 lightPos = glm::vec3(0.0f, 1.5f, 0.0f);
 
     //绘制循环
     while (!glfwWindowShouldClose(window))
@@ -148,28 +156,36 @@ int main()
         deltaTime = currentTime - lastTime;
         lastTime = currentTime;
 
-        // float time = glfwGetTime();
-
         glViewport(0, 0, screenWidth, screenHeight);        //左下角开始位置，右上角结束位置，把这部分显存划分到自己这里
         glfwPollEvents();                                   //监听键盘事件
         DoMovement();                                       //摄像机视角变换
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);               //指定背景颜色
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //设置背景颜色
+        lightPos = glm::rotate(lightPos, glm::radians(0.01f), glm::vec3(1.0f, 1.0f, 1.0f));
 
-        myShader.Use(); //之后的着色渲染都会使用这个 shader 程序
+        glm::mat4 view = camera.GetViewMatrix();                                                                                         //从相机获取视角
+        glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f); //投影
+        glm::mat4 transform = glm::mat4(1.0f);                                                                                           //初始化位置，使得可以旋转
+        transform = glm::translate(transform, lightPos);
+        transform = glm::scale(transform, glm::vec3(0.1f, 0.1f, 0.1f));
 
-        glm::mat4 transform = glm::mat4(1.0f); //初始化位置，使得可以旋转
+        lightShader.Use();
+        glUniformMatrix4fv(glGetUniformLocation(lightShader.Program, "transform"), 1, GL_FALSE, glm::value_ptr(transform));
+        glUniformMatrix4fv(glGetUniformLocation(lightShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(lightShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        lightModel.Draw(lightShader);
+
+        ourShader.Use(); //之后的着色渲染都会使用这个 shader 程序
+        transform = glm::mat4(1.0f);
         transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, -2.0f));
         transform = glm::rotate(transform, glm::radians(20.0f) * static_cast<GLfloat>(glfwGetTime()), glm::vec3(1.0f, 1.0f, 1.0f));
-        transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.5f));
+        // transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.5f));
 
-        GLuint transLoc = glGetUniformLocation(myShader.Program, "transform");
+        GLuint transLoc = glGetUniformLocation(ourShader.Program, "transform");
         glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
-        glm::mat4 view = camera.GetViewMatrix(); //从相机获取视角
-        glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
-        glUniformMatrix4fv(glGetUniformLocation(myShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(glGetUniformLocation(myShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 
         glBindVertexArray(VAO); //绑定完，可以画图了
         glDrawArrays(GL_TRIANGLES, 0, 36);
