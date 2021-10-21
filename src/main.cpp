@@ -82,16 +82,6 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //指定背景颜色
 		glClear(GL_COLOR_BUFFER_BIT);		  //设置背景颜色
 
-		for (int m = 0; m < 6; m++)
-		{
-			vertices[m * 6 + 3] = cos(time * 5) * 0.5f + 0.5f;				//更改红色
-			vertices[m * 6 + 4] = (1 - cos(time * 5) * 0.5f - 0.5f) * 0.6f; //更改绿色
-		}
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);																	   //绑定 VBO
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);							   //将顶点数据复制到缓冲区
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat))); //读颜色
-		glBindBuffer(GL_ARRAY_BUFFER, 0);																	   //解除顶点缓冲对象 VBO 的绑定
-
 		myShader.Use(); //之后的着色渲染都会使用这个 shader 程序
 
 		glUniform1f(glGetUniformLocation(myShader.Program, "time"), time);
