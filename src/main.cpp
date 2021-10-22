@@ -81,7 +81,7 @@ int main()
     glEnable(GL_BLEND); //开启混合测试
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Shader ourShader = Shader("src/res/shaders/core.vs", "src/res/shaders/core.fs");      //导入并实例化 shader
+    Shader ourShader = Shader("src/res/shaders/core.vs", "src/res/shaders/core.fs");     //导入并实例化 shader
     Shader lightShader = Shader("src/res/shaders/light.vs", "src/res/shaders/light.fs"); //导入并实例化 shader
 
     Light lightModel = Light();
@@ -161,7 +161,7 @@ int main()
         DoMovement();                                       //摄像机视角变换
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);               //指定背景颜色
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //设置背景颜色
-        lightPos = glm::rotate(lightPos, glm::radians(0.01f), glm::vec3(1.0f, 1.0f, 1.0f));
+        lightPos = glm::rotate(lightPos, glm::radians(0.05f), glm::vec3(1.0f, 1.0f, 1.0f));
 
         glm::mat4 view = camera.GetViewMatrix();                                                                                         //从相机获取视角
         glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f); //投影
@@ -178,7 +178,7 @@ int main()
         ourShader.Use(); //之后的着色渲染都会使用这个 shader 程序
         transform = glm::mat4(1.0f);
         transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, -2.0f));
-        transform = glm::rotate(transform, glm::radians(20.0f) * static_cast<GLfloat>(glfwGetTime()), glm::vec3(1.0f, 1.0f, 1.0f));
+        transform = glm::rotate(transform, glm::radians(20.0f) * static_cast<GLfloat>(glfwGetTime()), glm::vec3(1.0f, 1.0f, 1.0f)); //彩色方块旋转
         // transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.5f));
 
         GLuint transLoc = glGetUniformLocation(ourShader.Program, "transform");
@@ -186,6 +186,11 @@ int main()
 
         glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+        glUniform3f(glGetUniformLocation(ourShader.Program, "ViewPos"), camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
+        glUniform3f(glGetUniformLocation(ourShader.Program, "LightPos"), lightPos.x, lightPos.y, lightPos.z);
+        glUniform1f(glGetUniformLocation(ourShader.Program, "material.diffuse"), 0.4f);
+        glUniform1f(glGetUniformLocation(ourShader.Program, "material.specular"), 0.6f);
 
         glBindVertexArray(VAO); //绑定完，可以画图了
         glDrawArrays(GL_TRIANGLES, 0, 36);

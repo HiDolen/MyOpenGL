@@ -48,6 +48,10 @@ public:
     {
         return this->zoom;
     }
+    glm::vec3 GetPosition()
+    {
+        return this->position;
+    }
     void ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime)
     {
         GLfloat velocity = this->movementSpeed * deltaTime;
