@@ -36,7 +36,9 @@ GLfloat lastY = HEIGHT / 2.0f;
 bool firstMouse = true; //避免一开始的鼠标跳变
 
 using namespace std;
-
+//////////////////////////
+glm::mat4 myTransform = glm::mat4(1.0f); //用于设定方块位置
+//////////////////////////
 int main()
 {
     glfwInit();
@@ -176,7 +178,7 @@ int main()
         lightModel.Draw(lightShader);
 
         ourShader.Use(); //之后的着色渲染都会使用这个 shader 程序
-        transform = glm::mat4(1.0f);
+        transform = myTransform;
         transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, -2.0f));
         transform = glm::rotate(transform, glm::radians(20.0f) * static_cast<GLfloat>(glfwGetTime()), glm::vec3(1.0f, 1.0f, 1.0f)); //彩色方块旋转
         // transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.5f));
@@ -228,19 +230,23 @@ void DoMovement()
 {
     if (keys[GLFW_KEY_W] || keys[GLFW_KEY_UP])
     {
-        camera.ProcessKeyboard(FORWARD, deltaTime);
+        // camera.ProcessKeyboard(FORWARD, deltaTime);
+        myTransform = glm::translate(myTransform, glm::vec3(0.0f, 0.05f, 0.0f));
     }
     if (keys[GLFW_KEY_S] || keys[GLFW_KEY_DOWN])
     {
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
+        // camera.ProcessKeyboard(BACKWARD, deltaTime);
+        myTransform = glm::translate(myTransform, glm::vec3(0.0f, -0.05f, 0.0f));
     }
     if (keys[GLFW_KEY_A] || keys[GLFW_KEY_LEFT])
     {
-        camera.ProcessKeyboard(LEFT, deltaTime);
+        // camera.ProcessKeyboard(LEFT, deltaTime);
+        myTransform = glm::translate(myTransform, glm::vec3(-0.05f, 0.0f, 0.0f));
     }
     if (keys[GLFW_KEY_D] || keys[GLFW_KEY_RIGHT])
     {
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+        // camera.ProcessKeyboard(RIGHT, deltaTime);
+        myTransform = glm::translate(myTransform, glm::vec3(0.05f, 0.0f, 0.0f));
     }
 }
 
