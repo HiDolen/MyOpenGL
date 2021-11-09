@@ -81,7 +81,7 @@ int main()
     glEnable(GL_BLEND); //开启混合测试
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Shader ourShader = Shader("src/res/shaders/core.vs", "src/res/shaders/core.fs");      //导入并实例化 shader
+    Shader ourShader = Shader("src/res/shaders/core.vs", "src/res/shaders/core.fs");     //导入并实例化 shader
     Shader lightShader = Shader("src/res/shaders/light.vs", "src/res/shaders/light.fs"); //导入并实例化 shader
 
     Light lightModel = Light();
@@ -147,7 +147,7 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0); //解除顶点缓冲对象 VBO 的绑定，防止误操作
     glBindVertexArray(0);             //解除绑定 VAO
 
-    glm::vec3 lightPos = glm::vec3(0.0f, 1.5f, 0.0f);
+    glm::vec3 lightPos = glm::vec3(1.0f, -0.2f, 0.0f);
 
     //绘制循环
     while (!glfwWindowShouldClose(window))
@@ -161,7 +161,7 @@ int main()
         DoMovement();                                       //摄像机视角变换
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);               //指定背景颜色
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //设置背景颜色
-        lightPos = glm::rotate(lightPos, glm::radians(0.01f), glm::vec3(1.0f, 1.0f, 1.0f));
+        lightPos = glm::rotate(lightPos, glm::radians(0.05f), glm::vec3(0.3f, 1.0f, 0.0f));
 
         glm::mat4 view = camera.GetViewMatrix();                                                                                         //从相机获取视角
         glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f); //投影
@@ -179,7 +179,6 @@ int main()
         transform = glm::mat4(1.0f);
         transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, -2.0f));
         transform = glm::rotate(transform, glm::radians(20.0f) * static_cast<GLfloat>(glfwGetTime()), glm::vec3(1.0f, 1.0f, 1.0f));
-        // transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.5f));
 
         GLuint transLoc = glGetUniformLocation(ourShader.Program, "transform");
         glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(transform));
@@ -259,5 +258,5 @@ void MouseCallback(GLFWwindow *window, double xPos, double yPos)
     lastX = xPos;
     lastY = yPos;
 
-    camera.ProcessMouseMovement(xOffset, yOffset);
+    // camera.ProcessMouseMovement(xOffset, yOffset);
 }
