@@ -168,26 +168,38 @@ int main()
         glm::mat4 transform = glm::mat4(1.0f);                                                                                           //初始化位置，使得可以旋转
         transform = glm::translate(transform, lightPos);
         transform = glm::scale(transform, glm::vec3(0.1f, 0.1f, 0.1f));
+        transform = glm::rotate(transform, glm::radians(20.0f) * static_cast<GLfloat>(glfwGetTime() * 5.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
-        lightShader.Use();
+        /* lightShader.Use();
         glUniformMatrix4fv(glGetUniformLocation(lightShader.Program, "transform"), 1, GL_FALSE, glm::value_ptr(transform));
         glUniformMatrix4fv(glGetUniformLocation(lightShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(lightShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        lightModel.Draw(lightShader);
+        lightModel.Draw(lightShader); */
 
-        ourShader.Use(); //之后的着色渲染都会使用这个 shader 程序
-        transform = glm::mat4(1.0f);
+        ourShader.Use();        //之后的着色渲染都会使用这个 shader 程序
+        glBindVertexArray(VAO); //绑定完，可以画图了
+
+        GLuint transLoc = glGetUniformLocation(ourShader.Program, "transform"); //获得 shader 的变量入口，用于 glUniformMatrix4fx 函数
+
+        /* transform = glm::mat4(1.0f);
         transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, -2.0f));
-        transform = glm::rotate(transform, glm::radians(20.0f) * static_cast<GLfloat>(glfwGetTime()), glm::vec3(1.0f, 1.0f, 1.0f));
+        transform = glm::rotate(transform, glm::radians(20.0f) * static_cast<GLfloat>(glfwGetTime()), glm::vec3(1.0f, 1.0f, 1.0f)); */
 
-        GLuint transLoc = glGetUniformLocation(ourShader.Program, "transform");
         glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
         glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 
-        glBindVertexArray(VAO); //绑定完，可以画图了
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        ////////////////////////////////////////////////
+        // glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::mat4(1.0f);
+        transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 0.0f));
+        transform = glm::scale(transform, glm::vec3(0.6f, 0.6f, 0.6f));
+        transform = glm::rotate(transform, glm::radians(20.0f) * static_cast<GLfloat>(glfwGetTime()), glm::vec3(1.0f, 1.0f, 1.0f));
+        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(transform));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        ///////////////////////////////////////////////
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //解除绑定 EBO
         glBindVertexArray(0);                     //解除绑定 VAO
 
