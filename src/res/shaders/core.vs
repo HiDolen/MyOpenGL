@@ -12,12 +12,13 @@ void main()
     vertexColor = myColor; //将值传出
     //outTextCoord = vec2(textCoord.x, 1 - textCoord.y);
 
-    if(time != 0)
-    {
-        outTextCoord = vec2(textCoord.x, 1 - textCoord.y + time * 0.1f);
-    }
-    else
-    {
-        outTextCoord = vec2(textCoord.x, 1 - textCoord.y);
-    }
+    //if(time != 0)
+    //{
+    //    outTextCoord = vec2(textCoord.x, 1 - textCoord.y + time * 0.1f);
+    //}
+    //else
+    //{
+    //    outTextCoord = vec2(textCoord.x, 1 - textCoord.y);
+    //}
+    
 };
