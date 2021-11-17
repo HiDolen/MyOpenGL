@@ -110,7 +110,7 @@ int main()
     // glGenerateMipmap(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, textureID[0]); //加载第一幅纹理
-    image = SOIL_load_image("src/res/images/T_Reflection_Tiles_D.jpg", &width, &height, 0, SOIL_LOAD_RGBA);
+    image = SOIL_load_image("src/res/images/fire.jpg", &width, &height, 0, SOIL_LOAD_RGBA);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
     glGenerateMipmap(GL_TEXTURE_2D);
     glUniform1i(glGetUniformLocation(myShader.Program, "texture0"), 0); //传值
